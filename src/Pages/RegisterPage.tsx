@@ -1,13 +1,16 @@
 import React, { useRef, useState } from "react";
+import registerUser from "../api/register";
 import loginphoto from "../Assets/Img/LogInPhoto.png";
 import Header from "../Components/Header/Header";
 import profile from "../Assets/Img/profile.png";
 import valid from "../Assets/Img/valid.svg";
 import seePassword from "../Assets/Img/seePassword.svg";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const RegisterPage = () => {
   const [profileImg, setProfileImg] = useState(profile);
+  const navigate = useNavigate();
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [username, setUsername] = useState("");
@@ -16,16 +19,11 @@ const RegisterPage = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
-  const isUsernameUnique = username !== "taken";
-  const isEmailUnique = email !== "taken@example.com";
-
   // Validation functions
-  const isUsernameValid = username.length >= 3 && isUsernameUnique;
-  const isEmailValid =
-    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) && isEmailUnique;
+  const isUsernameValid = username.length >= 3;
+  const isEmailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   const isPasswordValid = password.length >= 3;
-  const isConfirmPasswordValid =
-    confirmPassword.length >= 3 && confirmPassword === password;
+  const isConfirmPasswordValid = confirmPassword.length >= 3 && confirmPassword === password;
 
   const handleUploadClick = () => {
     fileInputRef.current?.click();
@@ -34,6 +32,7 @@ const RegisterPage = () => {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      setAvatarFile(file);
       const reader = new FileReader();
       reader.onload = (ev) => {
         setProfileImg(ev.target?.result as string);
@@ -44,7 +43,31 @@ const RegisterPage = () => {
 
   const handleRemove = () => {
     setProfileImg(profile);
+    setAvatarFile(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+  const [error, setError] = useState<string | null>(null);
+
+  const handleRegister = async () => {
+    setError(null);
+    try {
+      const response = await registerUser({
+        username,
+        email,
+        password,
+        password_confirmation: confirmPassword,
+        avatar: avatarFile,
+      });
+      localStorage.setItem("token", response.token);
+      // Redirect to login page after successful registration
+      navigate("/");
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("Unknown error occurred");
+      }
+    }
   };
 
   return (
@@ -166,9 +189,14 @@ const RegisterPage = () => {
           </div>
               {/* Buttons */}
           <div className="w-[554px] flex flex-col gap-[24px] flex justify-center items-center">
-            <button className="poppins-font font-normal text-[14px] leading-[14px] flex justify-center items-center w-full rounded-[10px] bg-[#FF4000] text-White h-[41px]">
+            <button
+              className="poppins-font font-normal text-[14px] leading-[14px] flex justify-center items-center w-full rounded-[10px] bg-[#FF4000] text-White h-[41px]"
+              onClick={handleRegister}
+              disabled={!(isUsernameValid && isEmailValid && isPasswordValid && isConfirmPasswordValid)}
+            >
               Register
             </button>
+            {error && <div className="text-Red w-full">{error}</div>}
             <div className="flex items-center gap-[8px]">
               <h2 className="poppins-font font-normal font-[400] text-[14px] text-DarkBlue2">
                 Already member?

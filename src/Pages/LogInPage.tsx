@@ -1,14 +1,33 @@
 import Header from "../Components/Header/Header";
 import loginphoto from "../Assets/Img/loginphoto.png";
 import valid from "../Assets/Img/valid.svg";
-import seePassword from "../Assets/Img/seePassword.svg"
+import seePassword from "../Assets/Img/seePassword.svg";
 import { Link } from "react-router-dom";
 import { useState } from "react";
+import loginUser from "../api/login";
 
 const LogInPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleLogin = async () => {
+    try {
+      const response = await loginUser({ email, password });
+      // Save token to localStorage
+      localStorage.setItem("token", response.token);
+      console.log("Login successful:", response);
+    } catch (error) {
+      if (error instanceof Error) {
+        setError(error.message);
+      } else {
+        setError("Unknown error occurred");
+      }
+      console.error("Login failed:", error);
+    }
+  };
+
   return (
     <div className="relative w-[1920px] h-[1080px]">
       <Header />
@@ -22,7 +41,7 @@ const LogInPage = () => {
             <div className="relative w-full">
               <input
                 className="poppins-font font-normal text-[14px] leading-[14px] border border-Gray2 rounded-[16px] p-[12px] pr-[36px] text-DarkBlue2 w-full"
-                placeholder="Email or username"
+                placeholder="Email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
@@ -30,7 +49,7 @@ const LogInPage = () => {
                 <img
                   src={valid}
                   alt="valid"
-                  className="absolute left-[150px] top-[16px]"
+                  className="absolute left-[80px] top-[16px]"
                 />
               )}
             </div>
@@ -59,9 +78,14 @@ const LogInPage = () => {
           </div>
 
           <div className="w-[554px] flex flex-col gap-[24px] flex justify-center items-center">
-            <button className="poppins-font font-normal text-[14px] leading-[14px] flex justify-center items-center w-full rounded-[10px] bg-[#FF4000] text-White h-[41px]">
+            <button
+              onClick={handleLogin}
+              className="poppins-font font-normal text-[14px] leading-[14px] flex justify-center items-center w-full rounded-[10px] bg-[#FF4000] text-White h-[41px]"
+            >
               Log in
             </button>
+            {error && <div className="text-Red w-full">{error}</div>}
+
             <div className="flex items-center gap-[8px]">
               <h2 className="poppins-font font-normal font-[400] text-[14px] text-DarkBlue2">
                 Not a member?
