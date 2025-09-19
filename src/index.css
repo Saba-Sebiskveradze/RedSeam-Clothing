@@ -57,10 +57,14 @@
   font-style: italic;
 }
 
+
+
 @theme {
   --color-DarkBlue: #10151f;
   --color-DarkBlue2: #3e424a;
   --color-Gray2: #e1dfe1;
+  --color-Gray: #F8F6F7;
+  --color-DarkGray: #212B36;
   --color-Red: #FF4000;
   --color-White: #ffffff;
 }
@@ -68,6 +72,7 @@
 .poppins-font {
   font-family: "Poppins", sans-serif;
 }
+
 * {
   box-sizing: border-box;
 }

@@ -59,8 +59,7 @@ const RegisterPage = () => {
         avatar: avatarFile,
       });
       localStorage.setItem("token", response.token);
-      // Redirect to login page after successful registration
-      navigate("/");
+      navigate("/login");
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(err.message);
@@ -76,7 +75,7 @@ const RegisterPage = () => {
       <div className="flex items-center">
         <img src={loginphoto} alt="loginphoto" />
         <div className="flex flex-col gap-[46px] ml-[173px]">
-          <h1 className="poppins-font font-semibold text-[42px] tracking-normal text-DarkBlue">
+          <h1 className="poppins-font font-semibold text-[42px]  text-DarkBlue">
             Registration
           </h1>
           <div className="flex items-center gap-[15px]">
@@ -202,7 +201,7 @@ const RegisterPage = () => {
                 Already member?
               </h2>
               <Link
-                to="/"
+                to="/login"
                 className="poppins-font font-normal text-[14px] no-underline leading-[14px] text-Red"
               >
                 Log in

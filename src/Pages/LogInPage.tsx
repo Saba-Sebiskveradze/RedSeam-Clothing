@@ -34,7 +34,7 @@ const LogInPage = () => {
       <div className="flex  items-center">
         <img src={loginphoto} alt="loginphoto" />
         <div className="flex flex-col gap-[46px] ml-[173px]">
-          <h1 className="poppins-font font-semibold text-[42px] tracking-normal text-DarkBlue">
+          <h1 className="poppins-font font-semibold text-[42px]  text-DarkBlue">
             Log in
           </h1>
           <div className="flex flex-col gap-[24px] w-[554px]">
@@ -49,7 +49,7 @@ const LogInPage = () => {
                 <img
                   src={valid}
                   alt="valid"
-                  className="absolute left-[80px] top-[16px]"
+                  className="absolute left-[60px] top-[16px]"
                 />
               )}
             </div>

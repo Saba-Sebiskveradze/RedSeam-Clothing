@@ -30,3 +30,45 @@ export interface RegisterResponse {
   };
   token: string;
 }
+
+export interface Product {
+  id: number;
+  name: string;
+  description: string | null;
+  release_year: string;
+  cover_image: string;
+  images: string[];
+  price: number;
+  available_colors: string[];
+  available_sizes: string[] | null;
+}
+
+export interface ApiLinks {
+  first: string;
+  last: string;
+  prev: string;
+  next: string;
+}
+
+export interface ApiMetaLink {
+  url: string | null;
+  label: string;
+  active: boolean;
+}
+
+export interface ApiMeta {
+  current_page: number;
+  from: number;
+  last_page: number;
+  links: ApiMetaLink[];
+  path: string;
+  per_page: number;
+  to: number;
+  total: number;
+}
+
+export interface ProductsApiResponse {
+  data: Product[];
+  links: ApiLinks;
+  meta: ApiMeta;
+}
