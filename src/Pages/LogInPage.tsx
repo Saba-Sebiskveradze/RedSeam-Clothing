@@ -15,7 +15,6 @@ const LogInPage = () => {
   const handleLogin = async () => {
     try {
       const response = await loginUser({ email, password });
-      // Save token to localStorage
       localStorage.setItem("token", response.token);
       console.log("Login successful:", response);
     } catch (error) {
