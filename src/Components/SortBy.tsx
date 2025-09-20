@@ -16,6 +16,12 @@ const SortBy: React.FC<SortByProps> = ({ currentSort, onSortChange, isOpen, onTo
     { value: 'price-high-low' as SortOption, label: 'Price, high to low' }
   ];
 
+  const getCurrentSortLabel = () => {
+    if (currentSort === null) return 'Sort by';
+    const option = sortOptions.find(opt => opt.value === currentSort);
+    return option ? option.label : 'Sort by';
+  };
+
   const handleOptionSelect = (option: SortOption) => {
     onSortChange(option);
     onToggle();
@@ -28,7 +34,7 @@ const SortBy: React.FC<SortByProps> = ({ currentSort, onSortChange, isOpen, onTo
         onClick={onToggle}
       >
         <h2 className="poppins-font font-[400] text-[16px] text-DarkBlue">
-          Sort by
+          {getCurrentSortLabel()}
         </h2>
         <img 
           src={chevrondown} 

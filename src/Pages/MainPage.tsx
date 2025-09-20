@@ -6,7 +6,7 @@ import { Pagination } from "../Components/Pagination";
 import SortBy from "../Components/SortBy";
 import filter from "../Assets/Img/filter.svg";
 import { useProductFilter } from "../hooks/useProductFilter";
-import { usePagination } from "../hooks/usePagination";
+import xMark from "../Assets/Img/x-mark.svg"
 
 const MainPage: React.FC = () => {
   const [showFilter, setShowFilter] = useState(false);
@@ -17,29 +17,19 @@ const MainPage: React.FC = () => {
   });
 
   const {
-    filteredProducts,
+    products,
     loading,
     error,
     currentSort,
-    applyFilters,
-    applySorting
-  } = useProductFilter();
-
-  const {
     currentPage,
     totalPages,
-    paginatedItems,
-    goToPage,
-    canGoNext,
-    canGoPrev,
-    getDisplayRange
-  } = usePagination({
-    totalItems: filteredProducts.length,
-    itemsPerPage: 10
-  });
-
-  const displayedProducts = paginatedItems(filteredProducts);
-  const { start, end } = getDisplayRange();
+    totalItems,
+    meta,
+    appliedFilters,
+    applyFilters,
+    applySorting,
+    goToPage
+  } = useProductFilter();
 
   const handleFilterToggle = () => {
     setShowFilter(!showFilter);
@@ -66,11 +56,36 @@ const MainPage: React.FC = () => {
     applyFilters(filterInputs);
   };
 
+  const handleClearFilters = () => {
+    const emptyFilters = { minPrice: '', maxPrice: '' };
+    setFilterInputs(emptyFilters);
+    applyFilters(emptyFilters);
+  };
+
+  const hasActiveFilters = () => {
+    return appliedFilters.minPrice || appliedFilters.maxPrice;
+  };
+
+  const getFilterDisplayText = () => {
+    const { minPrice, maxPrice } = appliedFilters;
+    if (minPrice && maxPrice) {
+      return `Price: ${minPrice}-${maxPrice}`;
+    } else if (minPrice) {
+      return `Price: ${minPrice}+`;
+    } else if (maxPrice) {
+      return `Price: up to ${maxPrice}`;
+    }
+    return '';
+  };
+
   const renderResultsText = () => {
-    if (filteredProducts.length === 0) {
+    if (!meta || totalItems === 0) {
       return "Showing 0 results";
     }
-    return `Showing ${start}–${end} of ${filteredProducts.length} results`;
+    
+    const start = meta.from || 0;
+    const end = meta.to || 0;
+    return `Showing ${start}–${end} of ${totalItems} results`;
   };
 
   if (loading) {
@@ -144,16 +159,25 @@ const MainPage: React.FC = () => {
         onApply={handleApplyFilter}
         onClose={() => setShowFilter(false)}
       />
+      
+      {hasActiveFilters() && (
+        <div className="w-[145px] flex justify-between items-center ml-[100px] mt-[20px] border border-solid border-Gray2 px-[10px] py-[8px] gap-[6px] rounded-[16px]">
+          <div className="poppins-font  font-[400] text-[14px] text-DarkBlue2">
+            {getFilterDisplayText()}
+          </div>
+          <img src={xMark} alt="Close filter" className="cursor-pointer" onClick={handleClearFilters} />
+        </div>
+      )}
+      
+      <ProductGrid products={products} loading={loading} />
 
-      <ProductGrid products={displayedProducts} loading={false} />
-
-      {filteredProducts.length > 0 && (
+      {totalItems > 0 && totalPages > 1 && (
         <Pagination
           currentPage={currentPage}
           totalPages={totalPages}
           onPageChange={goToPage}
-          canGoPrev={canGoPrev}
-          canGoNext={canGoNext}
+          canGoPrev={currentPage > 1}
+          canGoNext={currentPage < totalPages}
         />
       )}
     </div>

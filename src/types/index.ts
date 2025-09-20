@@ -72,3 +72,16 @@ export interface ProductsApiResponse {
   links: ApiLinks;
   meta: ApiMeta;
 }
+
+export interface ProductFilters {
+  price_from?: number;
+  price_to?: number;
+}
+
+export type SortOption = 'price' | '-price' | 'created_at' | '-created_at';
+
+export interface ProductSearchParams {
+  page?: number;
+  filter?: ProductFilters;
+  sort?: SortOption;
+}

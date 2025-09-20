@@ -1,10 +1,12 @@
-import type { ProductsApiResponse, Product } from '../types';
+import type { ProductsApiResponse, ProductSearchParams } from '../types';
+import { buildProductQueryString } from '../utils/api';
 
 const API_BASE_URL = 'https://api.redseam.redberryinternship.ge/api';
 
-export const fetchProducts = async (page: number = 1): Promise<ProductsApiResponse> => {
+export const fetchProducts = async (params: ProductSearchParams = {}): Promise<ProductsApiResponse> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/products?page=${page}`);
+    const queryString = buildProductQueryString(params);
+    const response = await fetch(`${API_BASE_URL}/products${queryString}`);
     
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -14,33 +16,6 @@ export const fetchProducts = async (page: number = 1): Promise<ProductsApiRespon
     return data;
   } catch (error) {
     console.error('Error fetching products:', error);
-    throw error;
-  }
-};
-
-export const fetchAllProducts = async (): Promise<Product[]> => {
-  try {
-    const allProducts: Product[] = [];
-    let currentPage = 1;
-    let hasMorePages = true;
-
-    while (hasMorePages) {
-      const response = await fetch(`${API_BASE_URL}/products?page=${currentPage}`);
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
-      const data: ProductsApiResponse = await response.json();
-      allProducts.push(...data.data);
-      
-      hasMorePages = currentPage < data.meta.last_page;
-      currentPage++;
-    }
-
-    return allProducts;
-  } catch (error) {
-    console.error('Error fetching all products:', error);
     throw error;
   }
 };
