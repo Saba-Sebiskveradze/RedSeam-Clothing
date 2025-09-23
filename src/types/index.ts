@@ -6,9 +6,9 @@ export interface LoginRequest {
 export interface LoginResponse {
   user: {
     email: string;
-    name: string;
-    profile_photo: string;
-    id: string;
+    username: string;
+    avatar: string;
+    id: number;
   };
   token: string;
 }
@@ -24,11 +24,17 @@ export interface RegisterRequest {
 export interface RegisterResponse {
   user: {
     email: string;
-    name: string;
-    profile_photo: string;
-    id: string | number;
+    username: string;
+    avatar: string;
+    id: number;
   };
   token: string;
+}
+
+export interface Brand {
+  id: number;
+  name: string;
+  image: string;
 }
 
 export interface Product {
@@ -41,6 +47,11 @@ export interface Product {
   price: number;
   available_colors: string[];
   available_sizes: string[] | null;
+  brand?: Brand;
+  total_price?: number;
+  quantity?: number;
+  color?: string;
+  size?: string;
 }
 
 export interface ApiLinks {

@@ -1,4 +1,5 @@
 
+import { useNavigate } from "react-router-dom";
 import type { Product } from "../types";
 
 interface CardProps {
@@ -6,8 +7,18 @@ interface CardProps {
 }
 
 const Card = ({ product }: CardProps) => {
+  const navigate = useNavigate();
+
+  const handleCardClick = () => {
+    navigate(`/product/${product.id}`);
+    
+  };
+
   return (
-    <div className="w-[412px] h-[614px] flex flex-col gap-[12px] overflow-hidden">
+    <div 
+      className="w-[412px] h-[614px] flex flex-col gap-[12px] overflow-hidden cursor-pointer hover:opacity-90 transition-opacity"
+      onClick={handleCardClick}
+    >
         <img 
           src={product.cover_image} 
           alt={product.name}

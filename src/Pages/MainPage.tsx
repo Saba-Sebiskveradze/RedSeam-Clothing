@@ -30,6 +30,7 @@ const MainPage: React.FC = () => {
     applySorting,
     goToPage
   } = useProductFilter();
+console.log(products);
 
   const handleFilterToggle = () => {
     setShowFilter(!showFilter);
@@ -161,7 +162,7 @@ const MainPage: React.FC = () => {
       />
       
       {hasActiveFilters() && (
-        <div className="w-[145px] flex justify-between items-center ml-[100px] mt-[20px] border border-solid border-Gray2 px-[10px] py-[8px] gap-[6px] rounded-[16px]">
+        <div className="w-[145px] flex justify-center items-center ml-[100px] mt-[20px] border border-solid border-Gray2 px-[10px] py-[8px] gap-[2px] rounded-[16px]">
           <div className="poppins-font  font-[400] text-[14px] text-DarkBlue2">
             {getFilterDisplayText()}
           </div>

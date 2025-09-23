@@ -20,7 +20,7 @@ export const fetchProducts = async (params: ProductSearchParams = {}): Promise<P
   }
 };
 
-export const fetchProductById = async (id: number): Promise<{ data: import('../types').Product }> => {
+export const fetchProductById = async (id: number): Promise<import('../types').Product> => {
   try {
     const response = await fetch(`${API_BASE_URL}/products/${id}`);
     

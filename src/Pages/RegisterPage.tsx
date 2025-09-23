@@ -59,7 +59,8 @@ const RegisterPage = () => {
         avatar: avatarFile,
       });
       localStorage.setItem("token", response.token);
-      navigate("/login");
+      localStorage.setItem("user", JSON.stringify(response.user));
+      navigate("/");
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(err.message);

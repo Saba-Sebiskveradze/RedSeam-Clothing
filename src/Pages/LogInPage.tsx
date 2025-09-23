@@ -2,7 +2,7 @@ import Header from "../Components/Header/Header";
 import loginphoto from "../Assets/Img/loginphoto.png";
 import valid from "../Assets/Img/valid.svg";
 import seePassword from "../Assets/Img/seePassword.svg";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import loginUser from "../api/login";
 
@@ -11,12 +11,14 @@ const LogInPage = () => {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   const handleLogin = async () => {
     try {
       const response = await loginUser({ email, password });
       localStorage.setItem("token", response.token);
-      console.log("Login successful:", response);
+      localStorage.setItem("user", JSON.stringify(response.user));
+      navigate("/");
     } catch (error) {
       if (error instanceof Error) {
         setError(error.message);
