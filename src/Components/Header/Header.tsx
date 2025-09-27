@@ -5,7 +5,11 @@ import { useEffect, useState } from "react";
 import type { LoginResponse } from "../../types";
 import shoppingCart from "../../Assets/Img/shopping-cart.svg";
 
-const Header = () => {
+interface HeaderProps {
+  onCartClick?: () => void;
+}
+
+const Header = ({ onCartClick }: HeaderProps) => {
   const [userData, setUserData] = useState<LoginResponse["user"] | null>(null);
 
   useEffect(() => {
@@ -28,7 +32,12 @@ const Header = () => {
       <div className="flex items-center mr-[100px] ">
         {userData ? (
           <div className="flex items-center gap-[20px]">
-            <img src={shoppingCart} alt="shopping cart"  className="cursor-pointer"/>
+            <img 
+              src={shoppingCart} 
+              alt="shopping cart" 
+              className="cursor-pointer"
+              onClick={onCartClick}
+            />
 
             <img
               src={userData.avatar}
