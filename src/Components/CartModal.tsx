@@ -1,7 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import xMark from "../Assets/Img/x-mark.svg";
 import orangeCart from "../Assets/Img/orangeCart.png";
-import { getCartItems, updateCartQuantity, removeFromCart, type CartItem } from "../api/cart";
+import { Link } from "react-router-dom";
+import CartSummary from "./CartSummary";
+import { useCart } from "../hooks/useCart";
+import QuantityControl from "./UI/QuantityControl";
+import LoadingSpinner from "./UI/LoadingSpinner";
 
 interface CartModalProps {
   isOpen: boolean;
@@ -9,94 +13,25 @@ interface CartModalProps {
 }
 
 const CartModal = ({ isOpen, onClose }: CartModalProps) => {
-  const [cartItems, setCartItems] = useState<CartItem[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const getColorSpecificImage = (item: CartItem) => {
-    if (!item.color || !item.available_colors || !item.images) {
-      return item.cover_image;
-    }
-
-    const colorIndex = item.available_colors.indexOf(item.color);
-
-    if (colorIndex !== -1 && item.images[colorIndex]) {
-      return item.images[colorIndex];
-    }
-
-    return item.cover_image;
-  };
-
-  const fetchCartItems = async () => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      setError("Please log in to view cart");
-      return;
-    }
-
-    try {
-      setLoading(true);
-      setError(null);
-      const items = await getCartItems(token);
-      setCartItems(items);
-    } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Failed to fetch cart items"
-      );
-      setCartItems([]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleQuantityChange = async (itemId: number, newQuantity: number, color?: string, size?: string) => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      setError("Please log in to update cart");
-      return;
-    }
-
-    if (newQuantity <= 0) {
-      return; 
-    }
-
-    try {
-      await updateCartQuantity(itemId, { quantity: newQuantity, color, size }, token);
-      await fetchCartItems();
-    } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Failed to update quantity"
-      );
-    }
-  };
-
-  const handleRemoveItem = async (itemId: number, color?: string, size?: string) => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      setError("Please log in to remove items");
-      return;
-    }
-
-    try {
-      await removeFromCart(itemId, token, color, size);
-      await fetchCartItems();
-    } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Failed to remove item"
-      );
-    }
-  };
+  const {
+    items: cartItems,
+    loading,
+    error,
+    totalItems,
+    totalPrice,
+    fetchCart,
+    updateQuantity,
+    removeItem,
+    getColorSpecificImage,
+  } = useCart();
 
   useEffect(() => {
     if (isOpen) {
-      fetchCartItems();
+      fetchCart();
     }
-  }, [isOpen]);
+  }, [isOpen, fetchCart]);
 
   if (!isOpen) return null;
-
-  const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
-  const totalPrice = cartItems.reduce((sum, item) => sum + item.total_price, 0);
 
   return (
     <>
@@ -119,7 +54,8 @@ const CartModal = ({ isOpen, onClose }: CartModalProps) => {
 
         {loading ? (
           <div className="flex justify-center items-center flex-1">
-            <p className="poppins-font font-[400] text-[16px] text-DarkBlue">
+            <LoadingSpinner size="md" />
+            <p className="poppins-font font-[400] text-[16px] text-DarkBlue ml-4">
               Loading cart...
             </p>
           </div>
@@ -194,29 +130,20 @@ const CartModal = ({ isOpen, onClose }: CartModalProps) => {
                         </div>
                       </div>
                       <div className="flex justify-between items-center">
-                        <div className="flex items-center justify-center gap-[2px] w-[70px] h-[26px] border border-Gray2 rounded-[22px] px-[8px] py-[4px]">
-                          <div 
-                            className="w-[16px] h-[16px] flex items-center justify-center text-Gray2 cursor-pointer px-[0px] hover:text-DarkBlue transition-colors"
-                            onClick={() => handleQuantityChange(item.id, item.quantity - 1, item.color, item.size)}
-                          >
-                            -
-                          </div>
-                          <div className="poppins-font font-[500] text-[14px] text-DarkBlue">
-                            {item.quantity}
-                        </div>
-                          <div 
-                            className="w-[16px] h-[16px] flex items-center justify-center text-DarkBlue2 cursor-pointer hover:text-DarkBlue transition-colors"
-                            onClick={() => handleQuantityChange(item.id, item.quantity + 1, item.color, item.size)}
-                          >
-                            +
-                          </div>
-                        </div>
-                        <div 
-                          className="poppins-font font-[500] text-[14px] text-DarkBlue2 cursor-pointer hover:text-Red transition-colors"
-                          onClick={() => handleRemoveItem(item.id, item.color, item.size)}
+                        <QuantityControl
+                          quantity={item.quantity}
+                          onIncrease={() => updateQuantity(item.id, item.quantity + 1, item.color, item.size)}
+                          onDecrease={() => updateQuantity(item.id, item.quantity - 1, item.color, item.size)}
+                          disabled={loading}
+                        />
+                        <button
+                          className="poppins-font font-[500] text-[14px] text-DarkBlue2 cursor-pointer hover:text-Red transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                          onClick={() => removeItem(item.id, item.color, item.size)}
+                          disabled={loading}
+                          type="button"
                         >
                           Remove
-                        </div>
+                        </button>
                       </div>
                     </div>
                   </div>
@@ -224,41 +151,16 @@ const CartModal = ({ isOpen, onClose }: CartModalProps) => {
               </div>
             </div>
 
-            {/* Cart  */}
+            {/* Cart Summary */}
             <div className=" p-[40px] mt-auto">
-              
-              <div className="flex flex-col gap-[16px]">
-                <div className="flex justify-between items-center ">
-                  <div className="poppins-font font-[400] text-[16px] text-DarkBlue">
-                    Items subtotal
-                  </div>
-                  <div className="poppins-font font-[400] text-[16px] text-DarkBlue">
-                    ${totalPrice.toFixed(0)}
-                  </div>
-                </div>
-                <div className="flex justify-between items-center ">
-                  <div className="poppins-font font-[400] text-[16px] text-DarkBlue">
-                    Delivery
-                  </div>
-                  <div className="poppins-font font-[400] text-[16px] text-DarkBlue">
-                    $ 5
-                  </div>
-                </div>
-                 <div className="flex justify-between items-center ">
-                  <div className="poppins-font font-[500] text-[20px] text-DarkBlue">
-                    Total
-                  </div>
-                  <div className="poppins-font font-[500] text-[20px] text-DarkBlue">
-                    ${(totalPrice + 5).toFixed(0)}
-                  </div>
-                </div>
-                
-               
-              </div>
+              <CartSummary totalPrice={totalPrice} />
               <div className="w-[460px] h-[41px] bg-Red rounded-[10px] flex justify-center items-center cursor-pointer mt-[50px] ">
-                <p className="poppins-font font-[500] text-[18px] text-White">
+                <Link
+                  to="/checkout"
+                  className="poppins-font font-[500] text-[18px] text-White no-underline"
+                >
                   Go to checkout
-                </p>
+                </Link>
               </div>
             </div>
           </div>

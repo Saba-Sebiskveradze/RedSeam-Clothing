@@ -150,4 +150,42 @@ export const removeFromCart = async (
   }
 };
 
+export interface CheckoutRequest {
+  name: string;
+  surname: string;
+  email: string;
+  zip_code: string;
+  address: string;
+}
+
+export const checkout = async (
+  data: CheckoutRequest,
+  token: string
+): Promise<void> => {
+  try {
+    const response = await fetch(
+      'https://api.redseam.redberryinternship.ge/api/cart/checkout',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify(data),
+      }
+    );
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Failed to complete checkout');
+    }
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      throw new Error(error.message);
+    }
+    throw new Error('Failed to complete checkout: Unknown error');
+  }
+};
+
 export default addToCart;
